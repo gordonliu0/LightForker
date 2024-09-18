@@ -17,7 +17,7 @@ LightFormer uses two datasets:
 
 1. Install datasets from links above.
 2. Unzip and place in desired directory. I like to put it in the dataset folder, as indicated by the current generate_config.py settings.
-3. For LISA (called Kaggle here), you can remove the `/Annotations` folder as we have custom LightFormer annotations in `/data_label/data/Kaggle_Dataset`. For Bosch,
+3. For LISA (called Kaggle here), you can remove the `/Annotations` folder as we have custom LightFormer annotations in `/data_label/data/Kaggle_Dataset`. For Bosch, it's unclear where the dataset is downloaded from.
 4. In `configs/generate_config.py` update sample_database_folder paths for training, testing, and validation.
 5. Run `python3 configs/generate_config.py` to generate `configs/Light_Former_config.json`.
 6. Note that if you are keeping this on github make sure to .gitignore so you don't upload it!
