@@ -1,7 +1,6 @@
 import json
 import os
 
-
 def gen_config(out_path):
     config = dict(
         model_name = "LightFormerPredictor",
@@ -15,21 +14,21 @@ def gen_config(out_path):
         out_class_num = 4,
         training = dict(
             sample_database_folder = [
-                "/workspace/debug/prediction_ml_framework/data/Bosch_dataset/train"
+                "/Users/gordonliu/Documents/ml_projects/LightForker/dataset/Kaggle_Dataset/dayTrain"
             ],
             batch_size = 8,
             loader_worker_num = 20,
             epoch = 50
         ),
         validation = dict(
-            sample_database_folder = "/workspace/debug/prediction_ml_framework/data/Bosch_dataset/test",
+            sample_database_folder = "/Users/gordonliu/Documents/ml_projects/LightForker/dataset/Kaggle_Dataset/daySequence1",
             batch_size = 8,
             loader_worker_num = 20,
             check_interval = 1.0,
             limit_batches = 1.0
         ),
         test = dict(
-            sample_database_folder = "/workspace/debug/prediction_ml_framework/data/Bosch_dataset/test",
+            sample_database_folder = "/Users/gordonliu/Documents/ml_projects/LightForker/dataset/Kaggle_Dataset/daySequence2",
             batch_size = 1,
             loader_worker_num = 20,
             visualization = False,
@@ -43,11 +42,9 @@ def gen_config(out_path):
             gradient_clip_algorithm = "norm"
         )
     )
-
-
     with open(os.path.join(out_path, "Light_Former_config.json"), "w") as f:
         json.dump(config, f)
 
 if __name__ == "__main__":
-    out_path = "/media/tao/Data_Use/Light_Former/configs"
+    out_path = "/Users/gordonliu/Documents/ml_projects/LightForker/configs"
     gen_config(out_path)

@@ -19,12 +19,10 @@ def forward(self, x):
     x = self.bn1(x)
     x = self.relu(x)
     x = self.maxpool(x)
-
     x = self.layer1(x)
     x = self.layer2(x)
     x = self.layer3(x) # C: 256
     x = self.layer4(x) # C: 512
-
     return x
 
 class LightFormer(nn.Module):
@@ -74,7 +72,6 @@ class LightFormer(nn.Module):
         vectors = self.down_conv(vectors) # 512 -> 256
         _,c,h,w = vectors.shape
         vectors = vectors.view(B, image_num, c, h, w) # [bs,num_img, 256, h, w]
-    
         query = self.query_embed.weight
         agent_all_feature = self.encoder(query, vectors) # [bs, 1, 256]
         agent_all_feature = self.mlp(agent_all_feature)
@@ -82,7 +79,6 @@ class LightFormer(nn.Module):
         head2_out = self.head2(agent_all_feature)
         head1_out = head1_out.unsqueeze(3)
         head2_out = head2_out.unsqueeze(3)
-       
         return head1_out, head2_out
 
 
@@ -97,7 +93,15 @@ class LightFormerPredictor(pl.LightningModule, nn.Module):
         self.class_decoder_lf = Decoder(self.config)
 
     def forward(self, images):
-        return self.model(images) 
+        return self.model(images)
+
+    def configure_optimizers(self):
+        optimizer = optim.Adam(self.parameters(),
+                               lr=self.config['optim']['init_lr'])
+        scheduler = optim.lr_scheduler.StepLR(optimizer,
+                                              step_size=self.config['optim']['step_size'],
+                                              gamma=self.config['optim']['step_factor'])
+        return [optimizer], [scheduler]
 
     def cal_loss_step(self, batch):
         images = batch["images"]
@@ -109,7 +113,18 @@ class LightFormerPredictor(pl.LightningModule, nn.Module):
         class_loss = st_class_loss + lf_class_loss
         self.index = self.index+1
         return class_loss
-    
+
+    def training_step(self, batch, batch_idx):
+        loss  = self.cal_loss_step(batch)
+        self.log('train_loss', loss)
+        return
+
+    def validation_step(self, batch, batch_idx):
+        # loss = self.cal_loss_step(batch)
+        loss = self.cal_loss_step(batch)
+        self.log('val_loss', loss)
+        return loss
+
     def cal_ebeding_step(self, batch):
         images = batch["images"]
         head1_out, head2_out = self.model(images)
@@ -130,38 +145,16 @@ class LightFormerPredictor(pl.LightningModule, nn.Module):
             f.write(ss)
             f.flush()
         return 0
-    
-    def prob_loss(self, lightstatus, gt_label):
-        gt_label_idx = torch.argmax(gt_label,dim=-1)
-        pred_cls_score = torch.log(lightstatus)
-        loss = F.nll_loss(pred_cls_score.squeeze(-1), gt_label_idx, reduction='mean')
-
-        return loss
-    
-    def training_step(self, batch, batch_idx):
-        loss  = self.cal_loss_step(batch)
-        self.log('train_loss', loss)
-
-        return loss
-
-    def validation_step(self, batch, batch_idx):
-        # loss = self.cal_loss_step(batch)
-        loss = self.cal_loss_step(batch)
-        self.log('val_loss', loss)
-
-        return loss
 
     def test_step(self, batch, batch_idx):
         _ = self.cal_ebeding_step(batch)
         return
-    
-    def configure_optimizers(self):
-        optimizer = optim.Adam(self.parameters(), lr=self.config['optim']['init_lr'])
-        scheduler = optim.lr_scheduler.StepLR(optimizer,
-                                              step_size=self.config['optim']['step_size'],
-                                              gamma=self.config['optim']['step_factor'])
 
-        return [optimizer], [scheduler]
+    def prob_loss(self, lightstatus, gt_label):
+        gt_label_idx = torch.argmax(gt_label,dim=-1)
+        pred_cls_score = torch.log(lightstatus)
+        loss = F.nll_loss(pred_cls_score.squeeze(-1), gt_label_idx, reduction='mean')
+        return loss
 
     def train_dataloader(self):
         image_norm = [(0.485, 0.456, 0.406), (0.229, 0.224, 0.225)]
@@ -175,7 +168,6 @@ class LightFormerPredictor(pl.LightningModule, nn.Module):
                                                                 num_workers=self.config['training']['loader_worker_num'],
                                                                 drop_last=True,
                                                                 pin_memory=True)
-
         return train_loader
 
     def val_dataloader(self):
@@ -188,7 +180,6 @@ class LightFormerPredictor(pl.LightningModule, nn.Module):
                                 num_workers=self.config['validation']['loader_worker_num'],
                                 drop_last=True,
                                 pin_memory=True)
-
         return val_loader
 
     def test_dataloader(self):
@@ -201,5 +192,4 @@ class LightFormerPredictor(pl.LightningModule, nn.Module):
                                  num_workers=self.config['test']['loader_worker_num'],
                                  drop_last=False,
                                  pin_memory=True)
-
         return test_loader

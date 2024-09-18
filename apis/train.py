@@ -10,6 +10,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from pytorch_lightning.plugins import DDPPlugin
 from models.light_former import LightFormerPredictor
 
+
 def parse_args() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description='train intention network.')
 
@@ -56,7 +57,7 @@ if __name__ == '__main__':
     if node_num < 1:
         print('Node num must be greater than 0')
         exit(0)
-    
+
     # create logger
     log_dir = args.log_dir
     if not os.path.exists(log_dir):
@@ -89,7 +90,7 @@ if __name__ == '__main__':
     else:
         predictor = LightFormerPredictor(config=config)
 
-    
+
     trainer = pl.Trainer(
         callbacks=[checkpoint_callback, lr_monitor],
         gpus=gpu_num,
@@ -106,7 +107,7 @@ if __name__ == '__main__':
         accelerator="gpu",
         strategy=DDPPlugin(find_unused_parameters=False),
         replace_sampler_ddp=True,
-        deterministic=False, 
+        deterministic=False,
         auto_lr_find=True
     )
 
