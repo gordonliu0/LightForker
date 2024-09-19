@@ -21,3 +21,7 @@ LightFormer uses two datasets:
 4. In `configs/generate_config.py` update sample_database_folder paths for training, testing, and validation.
 5. Run `python3 configs/generate_config.py` to generate `configs/Light_Former_config.json`.
 6. Note that if you are keeping this on github make sure to .gitignore so you don't upload it!
+
+# Running
+
+1.
