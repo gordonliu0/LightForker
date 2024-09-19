@@ -18,7 +18,8 @@ def gen_config(out_path):
             ],
             batch_size = 8,
             loader_worker_num = 20,
-            epoch = 50
+            epoch = 10,
+            accelerator = "mps" # https://lightning.ai/docs/pytorch/stable/accelerators/mps_basic.html
         ),
         validation = dict(
             sample_database_folder = "/Users/gordonliu/Documents/ml_projects/LightForker/dataset/Kaggle_Dataset/daySequence1",
