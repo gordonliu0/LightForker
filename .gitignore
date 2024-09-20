@@ -1,6 +1,8 @@
 # Ignore virtual environment
 .venv
 .venv/*
+.venv-3.8
+.venv-3.8/*
 
 # Ignore IDE settings
 .vscode

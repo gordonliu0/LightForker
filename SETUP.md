@@ -1,10 +1,12 @@
 # Install Requirements
 
 1. Clone this repository.
-2. Make sure Python is updated to version 3.12.6, checking using `python3 --version`
-3. Set up a virtual environment using `python3 -m venv .venv` and `source .venv/bin/activate`
+2. Make sure you have Python3.8 installed, checking using `python3.8 --version`
+3. Set up a virtual environment using `python3.8 -m venv .venv` and `source .venv/bin/activate`
 4. Update pip using `pip install --upgrade pip`
 5. Install dependencies: `pip install -r requirements.txt`
+6. Install mmcv using `pip install mmcv==2.0.0rc4 -f https://download.openmmlab.com/mmcv/dist/cpu/torch1.13/index.html`
+7. Done!
 
 # Download Datasets
 

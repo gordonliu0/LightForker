@@ -45,7 +45,7 @@ if __name__ == '__main__':
     print("\nconfig:", config)
 
     # set device count
-    devices = args.gpu
+    devices = args.devices
     if devices == 0:
         print('Gpu not specified, exit normally')
         exit(0)
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     if checkpoint_file is not None:
         print(f'Using checkpoint: {checkpoint_file}')
 
-    # create logger
+    # create loggerr
     log_dir = args.log_dir
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
@@ -93,8 +93,8 @@ if __name__ == '__main__':
         max_epochs=config['training']['epoch'],
         logger=tb_logger,
         gradient_clip_algorithm=config['optim']['gradient_clip_algorithm'],
-        strategy='ddp',
-        sync_batchnorm=True,
+        # strategy='ddp',
+        # sync_batchnorm=True,
         # val_check_interval=config['validation']['check_interval'],
         # limit_val_batches=config['validation']['limit_batches'],
         # log_every_n_steps=config['log_every_n_steps'],
