@@ -15,3 +15,6 @@ imgs/*
 # Ignore dataset files
 dataset/Kaggle_Dataset
 dataset/Kaggle_Dataset/*
+
+# Ignore any images inside frames directories
+**/frames/**
