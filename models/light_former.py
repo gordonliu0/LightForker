@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-from torchvision import models
+from torchvision import models, transforms
 from torch.utils.data import DataLoader
 from .encoder import Encoder
 from .decoder import Decoder
@@ -158,16 +158,17 @@ class LightFormerPredictor(pl.LightningModule, nn.Module):
 
     def train_dataloader(self):
         image_norm = [(0.485, 0.456, 0.406), (0.229, 0.224, 0.225)]
-        print("what is this", self.config['training']['sample_database_folder'])
-        train_set = LightFormerDataset(self.config['training']['sample_database_folder'], image_norm)
+        transform = transforms.Normalize(mean=image_norm[0], std=image_norm[1])
+        train_set = LightFormerDataset(self.config['training']['sample_database_folder'], transform)
+        # print("what is this", self.config['training']['sample_database_folder'])
         print(f"...............................Total Samples {len(train_set)} .......................................")
         train_loader = DataLoader(dataset=train_set,
-                                                                batch_size=self.config['training']['batch_size'],
-                                                                shuffle=True,
-                                                                # collate_fn=AgentClosureBatch.from_data_list,
-                                                                num_workers=self.config['training']['loader_worker_num'],
-                                                                drop_last=True,
-                                                                pin_memory=True)
+                                  batch_size=self.config['training']['batch_size'],
+                                  shuffle=True,
+                                  # collate_fn=AgentClosureBatch.from_data_list,
+                                  num_workers=self.config['training']['loader_worker_num'],
+                                  drop_last=True,
+                                  pin_memory=True)
         return train_loader
 
     def val_dataloader(self):
@@ -188,7 +189,7 @@ class LightFormerPredictor(pl.LightningModule, nn.Module):
         test_loader = DataLoader(test_set,
                                  batch_size=self.config['test']['batch_size'],
                                  shuffle=False,
-                                #  collate_fn=AgentClosureBatch.from_data_list,
+                                 # collate_fn=AgentClosureBatch.from_data_list,
                                  num_workers=self.config['test']['loader_worker_num'],
                                  drop_last=False,
                                  pin_memory=True)

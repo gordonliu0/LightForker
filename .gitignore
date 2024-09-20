@@ -18,3 +18,7 @@ dataset/Kaggle_Dataset/*
 
 # Ignore any images inside frames directories
 **/frames/**
+
+# Ignore OS files
+.DS_Store
+Thumbs.db

@@ -8,22 +8,33 @@
 6. Install mmcv using `pip install mmcv==2.0.0rc4 -f https://download.openmmlab.com/mmcv/dist/cpu/torch1.13/index.html`
 7. Done!
 
-# Download Datasets
+# Datasets
 
 LightFormer uses two datasets:
 
 - Bosch Small Traffic Lights Dataset: https://hci.iwr.uni-heidelberg.de/content/bosch-small-traffic-lights-dataset
 - LISA Traffic Light Dataset: https://www.kaggle.com/datasets/mbornoe/lisa-traffic-light-dataset
 
-# Setup Datasets
+## Basic Dataset Setup
 
 1. Install datasets from links above.
-2. Unzip and place in desired directory. I like to put it in the dataset folder, as indicated by the current generate_config.py settings.
-3. For LISA (called Kaggle here), you can remove the `/Annotations` folder as we have custom LightFormer annotations in `/data_label/data/Kaggle_Dataset`. For Bosch, it's unclear where the dataset is downloaded from.
-4. In `configs/generate_config.py` update sample_database_folder paths for training, testing, and validation.
-5. Run `python3 configs/generate_config.py` to generate `configs/Light_Former_config.json`.
-6. Note that if you are keeping this on github make sure to .gitignore so you don't upload it!
+2. Unzip. Using images from the datasets, populate the data_label directory so it looks like this. (Copy `frames` folder into their respective places).
+   data_label/data
+   └── Kaggle_Dataset
+   └── dayTrain/dayTrain
+   ├── dayClip1
+   │ ├── frames
+   │ └── samples.json
+   └── dayClip2
+   ├── frames
+   └── samples.json
 
-# Running
+## Custom Dataset Setup
 
-1.
+1. (Optional) If you'd like to set up a custom structure, you can update sample_database_folder in `configs/generate_config.py`. Keep in mind each directory listed must have a `.json` for labels and a `frames` for images.
+2. Run `python3 configs/generate_config.py` to generate `configs/Light_Former_config.json`.
+3. Note that if you are keeping this on github make sure to .gitignore the image directories!
+
+# Training
+
+1. In console, run `python3 train.py -cfg [config file absolute path]`.
