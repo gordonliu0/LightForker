@@ -23,6 +23,7 @@ def parse_args() -> argparse.ArgumentParser:
                         action='store_true',
                         default=False, # False
                         help='resume only weights from chekpoint file')
+    parser.add_argument('-v', '--verbose', type=bool, default=False, required=False, help='print more console statements for debugging')
     args = parser.parse_args()
     return args
 
@@ -42,7 +43,8 @@ if __name__ == '__main__':
     print(f'\nUsing config: {config_file}')
     with open(config_file, 'r') as f:
         config = json.load(f)
-    print("\nconfig:", config)
+    if args.verbose:
+        print("\nconfig:", config)
 
     # set device count
     devices = args.devices
@@ -82,6 +84,9 @@ if __name__ == '__main__':
     lr_monitor = LearningRateMonitor(logging_interval='step',
                                      log_momentum=True,
                                      log_weight_decay=True)
+
+    # formatting
+    print()
 
     # create Trainer
     trainer = pl.Trainer(
