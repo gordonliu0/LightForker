@@ -19,11 +19,11 @@ class Encoder(nn.Module):
         )
         self.norm = nn.LayerNorm(self.embed_dim)
         self.prev_embed = None
-        
+
 
     def forward(self, query, all_img_feats):
         bs, _, _, h, w = all_img_feats.shape
-        ref_2d = self.get_reference_points(h, w, bs)
+        ref_2d = self.get_reference_points(h, w, bs, self.config['training']['accelerator'])
         query = query.unsqueeze(0).repeat(bs, 1, 1)
         all_feats = all_img_feats.flatten(3).permute(0,1,3,2)  # [8,10,120,256]
         _,num_imgs,resolu,_ = all_feats.shape
@@ -32,18 +32,18 @@ class Encoder(nn.Module):
         for i in range(num_imgs):
             single_feat = all_feats[:, i, :, :].view(bs, resolu, self.num_heads, -1)
             output = self.tsa(query, self.prev_embed)
-            output = self.sca(output, single_feat, ref_2d, h, w) 
-            output = output.mean(1).unsqueeze(1) 
+            output = self.sca(output, single_feat, ref_2d, h, w)
+            output = output.mean(1).unsqueeze(1)
             output = self.mlp(output) + output
             output = self.norm(output)
             # output = output.relu()
             self.prev_embed = output
             # self.prev_embed = None # 消融实验
-            
+
         self.prev_embed = None
 
-        return output 
-    
+        return output
+
     def get_reference_points(self, H=4, W=11, bs=8, device='cuda'):
         ref_y, ref_x = torch.meshgrid(torch.linspace(0.5, H - 0.5, H, dtype=torch.float, device=device), torch.linspace(0.5, W - 0.5, W, dtype=torch.float, device=device))
         ref_y = ref_y.reshape(-1)[None] / H

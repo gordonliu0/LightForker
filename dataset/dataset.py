@@ -23,11 +23,6 @@ class LightFormerDataset(Dataset):
             img_dir (list): Paths to the image directories, which should include a .json with annotations.
             transform (callable, optional): Optional transform to be applied on a sample.
         """
-        # Properties:
-        #   img_dir = original list of dataset directories
-        #   landmarks_frame = samples
-        #   root_dir_list = which root dir the sample is in
-        #   transform = transform to be applied to each image in each sample
 
         self.img_dir = img_dir
         self.landmarks_frame = []
@@ -53,7 +48,8 @@ class LightFormerDataset(Dataset):
         root_dir = self.root_dir_list[idx]
         images = torch.from_numpy(np.zeros((10,3,512,960),dtype='float32'))
         for i,img_name in enumerate(img_names):
-            image = io.imread(os.path.join(root_dir, '../frames',img_name))
+            image_path = os.path.join(root_dir, 'frames', img_name)
+            image = io.imread(image_path)
             image = resize(image, (512, 960), anti_aliasing=True)
             # numpy image: H x W x C
             # torch image: C x H x W

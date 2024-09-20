@@ -168,7 +168,8 @@ class LightFormerPredictor(pl.LightningModule, nn.Module):
                                   # collate_fn=AgentClosureBatch.from_data_list,
                                   num_workers=self.config['training']['loader_worker_num'],
                                   drop_last=True,
-                                  pin_memory=True)
+                                  pin_memory=True,
+                                  persistent_workers=True)
         return train_loader
 
     def val_dataloader(self):
@@ -180,7 +181,8 @@ class LightFormerPredictor(pl.LightningModule, nn.Module):
                                 # collate_fn=AgentClosureBatch.from_data_list,
                                 num_workers=self.config['validation']['loader_worker_num'],
                                 drop_last=True,
-                                pin_memory=True)
+                                pin_memory=True,
+                                persistent_workers=True)
         return val_loader
 
     def test_dataloader(self):
@@ -192,5 +194,6 @@ class LightFormerPredictor(pl.LightningModule, nn.Module):
                                  # collate_fn=AgentClosureBatch.from_data_list,
                                  num_workers=self.config['test']['loader_worker_num'],
                                  drop_last=False,
-                                 pin_memory=True)
+                                 pin_memory=True,
+                                 persistent_workers=True)
         return test_loader

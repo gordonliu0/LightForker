@@ -36,24 +36,25 @@ class MultiArcFace(nn.Module):
             input = input.squeeze()
             input = input.view(1,1024)
             return F.linear(F.normalize(input), F.normalize(self.weight))
-            
+
         input = input.squeeze(1)
         input = input.squeeze(2)
         cosine = F.linear(F.normalize(input), F.normalize(self.weight))
         B,_ = cosine.shape
         cosine = cosine.view(B, self.cluster_centres, self.out_class_num)
         sine = torch.sqrt((1.0 - torch.pow(cosine, 2)).clamp(0, 1))
-        phi = cosine * self.cos_m - sine * self.sin_m 
+        phi = cosine * self.cos_m - sine * self.sin_m
 
         if self.easy_margin:
             phi = torch.where(cosine > 0, phi, cosine)
         else:
             phi = torch.where(cosine > self.th, phi, cosine - self.mm)
-            
+
         one_hot = label
         one_hot = one_hot.unsqueeze(1)
-        one_hot = one_hot.repeat(1,self.cluster_centres,1)
-        output = (one_hot * phi) + ((1.0 - one_hot) * cosine)  
+        one_hot = one_hot.repeat(1,self.cluster_centres,2)
+        output = (one_hot * phi)
+        output = output + ((1.0 - one_hot) * cosine)
         output *= self.s
 
         return output

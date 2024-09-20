@@ -74,7 +74,7 @@ if __name__ == '__main__':
     if checkpoint_file is not None:
         print(f'Using checkpoint: {checkpoint_file}')
 
-    # create loggerr
+    # create logger
     log_dir = args.log_dir
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
@@ -94,15 +94,15 @@ if __name__ == '__main__':
         callbacks=[checkpoint_callback, lr_monitor],
         deterministic=False,
         devices=devices,
-        num_nodes=node_num,
         max_epochs=config['training']['epoch'],
         logger=tb_logger,
         gradient_clip_algorithm=config['optim']['gradient_clip_algorithm'],
+        log_every_n_steps=config['log_every_n_steps'],
+        # num_nodes=node_num,
         # strategy='ddp',
         # sync_batchnorm=True,
         # val_check_interval=config['validation']['check_interval'],
         # limit_val_batches=config['validation']['limit_batches'],
-        # log_every_n_steps=config['log_every_n_steps'],
         # replace_sampler_ddp=True,
         # auto_lr_find=True
     )
@@ -111,9 +111,9 @@ if __name__ == '__main__':
     resume_weight_only = args.resume_weight_only
     if resume_weight_only:
         predictor = LightFormerPredictor.load_from_checkpoint(config=config,
-                                                                   checkpoint_path=checkpoint_file,
-                                                                   strict=True)
-        trainer.fit(predictor)
+                                                              checkpoint_path=checkpoint_file,
+                                                              strict=True)
+        trainer.fit(predictor, ckpt_path=checkpoint_file)
     else:
         predictor = LightFormerPredictor(config=config)
-        trainer.fit(predictor, ckpt_path=checkpoint_file)
+        trainer.fit(predictor)
