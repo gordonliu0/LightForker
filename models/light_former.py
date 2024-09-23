@@ -14,7 +14,7 @@ from pathlib import Path
 from functools import partial
 
 
-def forward(self, x):
+def _resnet_forward(self, x):
     x = self.conv1(x)
     x = self.bn1(x)
     x = self.relu(x)
@@ -26,19 +26,26 @@ def forward(self, x):
     return x
 
 class LightFormer(nn.Module):
+
+
     def __init__(self, config):
         super().__init__()
         self.config = config
-        self.embed_dim = self.config["embed_dim"] # 256
+
+        # Remove last two layers: Average Pooling and Fully Connected
         self.resnet = models.resnet18(pretrained=True)
         self.resnet.fc = None
         self.resnet.avgpool = None
-        self.resnet.forward = partial(forward, self.resnet)
+
+        # Adjust resnet forward to reflect removed last two layers
+        self.resnet.forward = partial(_resnet_forward, self.resnet)
+
+
         self.down_conv = nn.Sequential(
-            nn.Conv2d(512, 1024,3),
+            nn.Conv2d(512, 1024, 3),
             nn.BatchNorm2d(1024),
             nn.ReLU(),
-            nn.Conv2d(1024, 256,3),
+            nn.Conv2d(1024, 256, 3),
             nn.BatchNorm2d(256)
         )
         self.mlp = nn.Sequential(
@@ -56,25 +63,46 @@ class LightFormer(nn.Module):
             nn.ReLU(),
             nn.Linear(1024,1024)
         )
+
+        # Query embeddings
+        self.embed_dim = self.config["embed_dim"] # 256
         self.num_query = self.config["num_query"]
         self.query_embed = nn.Embedding(self.num_query, self.embed_dim)
+
+        # Encoder
         self.encoder = Encoder(self.config)
 
 
     def forward(self, images, features=None):
         """
-        images: 10 buffered sequential images
+        images: self.config['image_num'] number of buffered sequential images (default 10)
         """
         image_num = self.config['image_num']
         B,_,c,h,w = images.shape
+
+        # Reshape Image Buffer to accommodate Resnet input shape
         images = images.reshape(B*image_num,c,h,w)
+
+        # Modified Resnet Backbone
         vectors = self.resnet(images)
+
+        # Down convolution encoding
         vectors = self.down_conv(vectors) # 512 -> 256
+
+        # Reshape back to batch, image number structure
         _,c,h,w = vectors.shape
         vectors = vectors.view(B, image_num, c, h, w) # [bs,num_img, 256, h, w]
+
+        # Grab query embedding
         query = self.query_embed.weight
+
+        # Run encoder architecture
         agent_all_feature = self.encoder(query, vectors) # [bs, 1, 256]
+
+        # Run simple multilayer perceptrons
         agent_all_feature = self.mlp(agent_all_feature)
+
+        # two headed outputs for use in straight and left decoders
         head1_out = self.head1(agent_all_feature)
         head2_out = self.head2(agent_all_feature)
         head1_out = head1_out.unsqueeze(3)
@@ -87,13 +115,12 @@ class LightFormerPredictor(pl.LightningModule, nn.Module):
     def __init__(self, config):
         super().__init__()
         self.config = config
+
+        # Model
         self.model = LightFormer(self.config)
         self.index = 0
         self.class_decoder_st = Decoder(self.config)
         self.class_decoder_lf = Decoder(self.config)
-
-    def forward(self, images):
-        return self.model(images)
 
     def configure_optimizers(self):
         optimizer = optim.Adam(self.parameters(),
@@ -102,6 +129,26 @@ class LightFormerPredictor(pl.LightningModule, nn.Module):
                                               step_size=self.config['optim']['step_size'],
                                               gamma=self.config['optim']['step_factor'])
         return [optimizer], [scheduler]
+
+    def forward(self, images):
+        return self.model(images)
+
+    def training_step(self, batch, batch_idx):
+        print("TRAINING STEP")
+        loss  = self.cal_loss_step(batch)
+        self.log('train_loss', loss, prog_bar=True)
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        print("VALIDATION STEP")
+        loss = self.cal_loss_step(batch)
+        self.log('val_loss', loss, prog_bar=True)
+        return loss
+
+    def test_step(self, batch, batch_idx):
+        print("VALIDATION STEP")
+        _ = self.cal_ebeding_step(batch)
+        return
 
     def cal_loss_step(self, batch):
         images = batch["images"]
@@ -114,15 +161,13 @@ class LightFormerPredictor(pl.LightningModule, nn.Module):
         self.index = self.index+1
         return class_loss
 
-    def training_step(self, batch, batch_idx):
-        loss  = self.cal_loss_step(batch)
-        self.log('train_loss', loss)
-        return
-
-    def validation_step(self, batch, batch_idx):
-        # loss = self.cal_loss_step(batch)
-        loss = self.cal_loss_step(batch)
-        self.log('val_loss', loss)
+    def prob_loss(self, lightstatus, gt_label):
+        """
+        Calculate the
+        """
+        gt_label_idx = torch.argmax(gt_label,dim=-1)
+        pred_cls_score = torch.log(lightstatus)
+        loss = F.nll_loss(pred_cls_score.squeeze(-1), gt_label_idx, reduction='mean')
         return loss
 
     def cal_ebeding_step(self, batch):
@@ -145,16 +190,6 @@ class LightFormerPredictor(pl.LightningModule, nn.Module):
             f.write(ss)
             f.flush()
         return 0
-
-    def test_step(self, batch, batch_idx):
-        _ = self.cal_ebeding_step(batch)
-        return
-
-    def prob_loss(self, lightstatus, gt_label):
-        gt_label_idx = torch.argmax(gt_label,dim=-1)
-        pred_cls_score = torch.log(lightstatus)
-        loss = F.nll_loss(pred_cls_score.squeeze(-1), gt_label_idx, reduction='mean')
-        return loss
 
     def train_dataloader(self):
         image_norm = [(0.485, 0.456, 0.406), (0.229, 0.224, 0.225)]

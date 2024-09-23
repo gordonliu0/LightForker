@@ -37,4 +37,6 @@ LightFormer uses two datasets:
 
 # Training
 
-1. In console, run `python3 train.py -cfg [config file absolute path]`.
+1. In console, run `PYTORCH_ENABLE_MPS_FALLBACK=1 python3 train.py -cfg [config file absolute path]`.
+
+PYTORCH_ENABLE_MPS_FALLBACK=1 python3 train.py -cfg /Users/gordonliu/Documents/ml_projects/LightForker/configs/Light_Former_config.json

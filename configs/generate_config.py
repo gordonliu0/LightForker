@@ -11,24 +11,24 @@ def gen_config(out_path):
         num_levels = 1,
         num_query = 1,
         log_every_n_steps = 10,
+        # [Encoder to Decoder] dimension of MLP layer
         mlp_out_channel = 1024,
+        # [Decoder] number of cluster_centres
         n = 8,
-        out_class_num = 4,
+        # [Decoder] number of out classes per head
+        out_class_num = 2,
         training = dict(
             sample_database_folder = [
                 "/Users/gordonliu/Documents/ml_projects/LightForker/data_label/data/Kaggle_Dataset/dayTrain/dayTrain/dayClip1",
                 "/Users/gordonliu/Documents/ml_projects/LightForker/data_label/data/Kaggle_Dataset/dayTrain/dayTrain/dayClip2",
-                # "/Users/gordonliu/Documents/ml_projects/LightForker/data_label/data/Kaggle_Dataset/dayTrain/dayTrain/dayClip3",
-                # "/Users/gordonliu/Documents/ml_projects/LightForker/data_label/data/Kaggle_Dataset/dayTrain/dayTrain/dayClip4",
-                # "/Users/gordonliu/Documents/ml_projects/LightForker/data_label/data/Kaggle_Dataset/dayTrain/dayTrain/dayClip5",
-                # "/Users/gordonliu/Documents/ml_projects/LightForker/data_label/data/Kaggle_Dataset/dayTrain/dayTrain/dayClip6",
-                # "/Users/gordonliu/Documents/ml_projects/LightForker/data_label/data/Kaggle_Dataset/dayTrain/dayTrain/dayClip7",
-                # "/Users/gordonliu/Documents/ml_projects/LightForker/data_label/data/Kaggle_Dataset/dayTrain/dayTrain/dayClip8",
-                # "/Users/gordonliu/Documents/ml_projects/LightForker/data_label/data/Kaggle_Dataset/dayTrain/dayTrain/dayClip9",
-                # "/Users/gordonliu/Documents/ml_projects/LightForker/data_label/data/Kaggle_Dataset/dayTrain/dayTrain/dayClip10",
-                # "/Users/gordonliu/Documents/ml_projects/LightForker/data_label/data/Kaggle_Dataset/dayTrain/dayTrain/dayClip11",
-                # "/Users/gordonliu/Documents/ml_projects/LightForker/data_label/data/Kaggle_Dataset/dayTrain/dayTrain/dayClip12",
-                # "/Users/gordonliu/Documents/ml_projects/LightForker/data_label/data/Kaggle_Dataset/dayTrain/dayTrain/dayClip13",
+                "/Users/gordonliu/Documents/ml_projects/LightForker/data_label/data/Kaggle_Dataset/dayTrain/dayTrain/dayClip3",
+                "/Users/gordonliu/Documents/ml_projects/LightForker/data_label/data/Kaggle_Dataset/dayTrain/dayTrain/dayClip4",
+                "/Users/gordonliu/Documents/ml_projects/LightForker/data_label/data/Kaggle_Dataset/dayTrain/dayTrain/dayClip5",
+                "/Users/gordonliu/Documents/ml_projects/LightForker/data_label/data/Kaggle_Dataset/dayTrain/dayTrain/dayClip6",
+                "/Users/gordonliu/Documents/ml_projects/LightForker/data_label/data/Kaggle_Dataset/dayTrain/dayTrain/dayClip7",
+                "/Users/gordonliu/Documents/ml_projects/LightForker/data_label/data/Kaggle_Dataset/dayTrain/dayTrain/dayClip8",
+                "/Users/gordonliu/Documents/ml_projects/LightForker/data_label/data/Kaggle_Dataset/dayTrain/dayTrain/dayClip9",
+                "/Users/gordonliu/Documents/ml_projects/LightForker/data_label/data/Kaggle_Dataset/dayTrain/dayTrain/dayClip10",
             ],
             batch_size = 8,
             loader_worker_num = 8,
@@ -37,7 +37,9 @@ def gen_config(out_path):
         ),
         validation = dict(
             sample_database_folder = [
-                "/Users/gordonliu/Documents/ml_projects/LightForker/dataset/Kaggle_Dataset/daySequence1",
+                "/Users/gordonliu/Documents/ml_projects/LightForker/data_label/data/Kaggle_Dataset/dayTrain/dayTrain/dayClip11",
+                "/Users/gordonliu/Documents/ml_projects/LightForker/data_label/data/Kaggle_Dataset/dayTrain/dayTrain/dayClip12",
+                "/Users/gordonliu/Documents/ml_projects/LightForker/data_label/data/Kaggle_Dataset/dayTrain/dayTrain/dayClip13",
             ],
             batch_size = 8,
             loader_worker_num = 8,
@@ -46,7 +48,8 @@ def gen_config(out_path):
         ),
         test = dict(
             sample_database_folder = [
-                "/Users/gordonliu/Documents/ml_projects/LightForker/dataset/Kaggle_Dataset/daySequence2",
+                "/Users/gordonliu/Documents/ml_projects/LightForker/data_label/data/Kaggle_Dataset/daySequence1/daySequence1",
+                "/Users/gordonliu/Documents/ml_projects/LightForker/data_label/data/Kaggle_Dataset/daySequence2/daySequence2",
             ],
             batch_size = 1,
             loader_worker_num = 8,

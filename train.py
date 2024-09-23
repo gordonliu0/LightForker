@@ -67,7 +67,7 @@ if __name__ == '__main__':
                                           filename="checkpoint-{epoch:04d}-{val_loss:.5f}",
                                           save_weights_only=False,
                                           mode='min',
-                                          save_top_k=10)
+                                          save_top_k=5)
 
     # set checkpoint path
     checkpoint_file = args.checkpoint
@@ -90,6 +90,10 @@ if __name__ == '__main__':
 
     # create Trainer
     trainer = pl.Trainer(
+        # DEBUGGING
+        # fast_dev_run=3,
+        # num_sanity_val_steps=2,
+        # CORE
         accelerator=config['training']['accelerator'],
         callbacks=[checkpoint_callback, lr_monitor],
         deterministic=False,
@@ -98,11 +102,13 @@ if __name__ == '__main__':
         logger=tb_logger,
         gradient_clip_algorithm=config['optim']['gradient_clip_algorithm'],
         log_every_n_steps=config['log_every_n_steps'],
+        val_check_interval=config['validation']['check_interval'],
+        limit_val_batches=config['validation']['limit_batches'],
+        # ADDITIONAL
         # num_nodes=node_num,
         # strategy='ddp',
         # sync_batchnorm=True,
-        # val_check_interval=config['validation']['check_interval'],
-        # limit_val_batches=config['validation']['limit_batches'],
+
         # replace_sampler_ddp=True,
         # auto_lr_find=True
     )
@@ -110,6 +116,7 @@ if __name__ == '__main__':
     # run training
     resume_weight_only = args.resume_weight_only
     if resume_weight_only:
+        ## do we need both lines to load checkpoint file?
         predictor = LightFormerPredictor.load_from_checkpoint(config=config,
                                                               checkpoint_path=checkpoint_file,
                                                               strict=True)
